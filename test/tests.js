@@ -14,8 +14,10 @@ const sinonchai = require( 'sinon-chai' );
 // const faker = require( 'faker' );
 const mime = require( 'mime' );
 const mongoose = require( 'mongoose' );
-const s3Mongo = require( 'fs-s3-mongo' );
 const Permissions = require( '../src/schemas/permissionSchema.js' );
+const s3Mongo = require( 'fs-s3-mongo' );
+const File = s3Mongo.schema.fileSchema;
+const Meta = s3Mongo.schema.metaDataSchema;
 
 chai.use( sinonchai );
 chai.use( chaiaspromised );
@@ -165,41 +167,41 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                 }
             },
         });
-    meta.save();
+        meta.save();
     // create the permission record
-    const permissions = new Permissions({
-        get resourceType() {
-            let resourceType;
-            if ( meta.mimeType === 'folder' ) {
-                resourceType = 'folder';
-            }
-            else {
-                resourceType = 'file';
-            }
-            return resourceType;
-        },  // project or file/folder and we can easily add additional resource types later
-        resourceId: meta.id, // links to metadata id or project id
-        appliesTo: 'user', // 'user', 'group', 'public'
-        userIdVar,
-        groupId: null, // if applies to group
-        read: true,
-        write: true,
-        destroy: true,
-        // share: [String], add additional user with default permissions for collaboration
-        manage: true, // update/remove existing permissions on resource
-    });
-    permissions.save();
+        const permissions = new Permissions({
+            get resourceType() {
+                let resourceType;
+                if ( meta.mimeType === 'folder' ) {
+                    resourceType = 'folder';
+                }
+                else {
+                    resourceType = 'file';
+                }
+                return resourceType;
+            },  // project or file/folder and we can easily add additional resource types later
+            resourceId: meta.id, // links to metadata id or project id
+            appliesTo: 'user', // 'user', 'group', 'public'
+            userIdVar,
+            groupId: null, // if applies to group
+            read: true,
+            write: true,
+            destroy: true,
+            // share: [String], add additional user with default permissions for collaboration
+            manage: true, // update/remove existing permissions on resource
+        });
+        permissions.save();
     // create the file record
-    const file = new File({
-        metaDataId: meta.id, // link to METADATA
-        userId: userIdVar, // link to User Collection
-        get name() {
-            return array.join( '/' ).slice( 0, index );
-        },
-        get parent() {
-            return array.join( '/' ).slice( 0, index - 1 );
-        },
+        const file = new File({
+            metaDataId: meta.id, // link to METADATA
+            userId: userIdVar, // link to User Collection
+            get name() {
+                return array.join( '/' ).slice( 0, index );
+            },
+            get parent() {
+                return array.join( '/' ).slice( 0, index - 1 );
+            },
+        });
+        file.save();
     });
-    file.save();
-});
 };

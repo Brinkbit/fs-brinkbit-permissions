@@ -1,7 +1,7 @@
 'use strict';
 
-const s3Mongo = require( 'fs-s3-mongo' );
 const Permissions = require( './schemas/permissionSchema.js' );
+const s3Mongo = require( 'fs-s3-mongo' );
 const File = s3Mongo.schema.fileSchema;
 const Meta = s3Mongo.schema.metaDataSchema;
 
