@@ -54,9 +54,7 @@ module.exports.verify = ( user, operation, path ) => {
         }
         // if there's another level and this was not a folder, we have a problem
         if ( isParent && folderFail ) {
-            return new Promise(( resolve, reject ) => {
-                reject( 'tried to add object to file' );
-            });
+            Promise.reject( 'tried to add object to file' );
         }
 
         // if there is another level, increment
@@ -68,9 +66,7 @@ module.exports.verify = ( user, operation, path ) => {
 
     // if this is not an exact match, and the last path was not a folder, we have a problem
     if ( !fileExists && folderFail ) {
-        return new Promise(( resolve, reject ) => {
-            reject( 'tried to add object to file' );
-        });
+        Promise.reject( 'INVALID_RESOURCE' );
     }
 
     // get permissions for the user on the last parent
@@ -89,38 +85,28 @@ module.exports.verify = ( user, operation, path ) => {
     // a file that already exists is required for some operations, and excluded for others
     // required for read, update, destroy
     if ( !fileExists && operation === 'read' || 'update' || 'destroy' ) {
-        return new Promise(( resolve, reject ) => {
-            reject( 'object does not exist' );
-        });
+        Promise.reject( 'object does not exist' );
     }
 
     // can't exist for write
     if ( fileExists && operation === 'write' ) {
-        return new Promise(( resolve, reject ) => {
-            reject( 'object already exists at that path' );
-        });
+        Promise.reject( 'object already exists at that path' );
     }
 
     // test permissions against various actions
     if ( operation === 'read' &&
         permissions.indexOf( 'read' ) === -1 ) {
-        return new Promise(( resolve, reject ) => {
-            reject( 'user does not have read permissions on this object' );
-        });
+        Promise.reject( 'user does not have read permissions on this object' );
     }
     if ( operation === 'write' || 'update' || 'destroy' &&
         permissions.indexOf( 'write' ) === -1 ) {
-        return new Promise(( resolve, reject ) => {
-            reject( 'user does not have write permissions on this object' );
-        });
+        Promise.reject( 'user does not have write permissions on this object' );
     }
 
     // if it gets this far it's succeeded!
     // return the parent path and remaining path
-    return new Promise(( resolve ) => {
-        resolve({
-            lastParent,
-            remainingPath: pathArray.slice( i + 1, pathArray.length ),
-        });
+    Promise.resolve({
+        lastParent,
+        remainingPath: pathArray.slice( i + 1, pathArray.length ),
     });
 };
