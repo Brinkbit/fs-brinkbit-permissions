@@ -14,8 +14,8 @@ const mime = require( 'mime' );
 const mongoose = require( 'mongoose' );
 const Permissions = require( '../src/schemas/permissionSchema.js' );
 const s3Mongo = require( 'fs-s3-mongo' );
-const File = s3Mongo.schema.fileSchema;
-const Meta = s3Mongo.schema.metaDataSchema;
+const File = s3Mongo.schema.file;
+const Meta = s3Mongo.schema.meta;
 
 chai.use( sinonchai );
 chai.use( chaiaspromised );
