@@ -56,8 +56,7 @@ module.exports.verify = ( user, operation, path ) => {
         if ( isParent && folderFail ) {
             Promise.reject( 'tried to add object to file' );
         }
-
-        // if there is another level, increment
+        // if this is not a parent, leave the loop
         if ( !isParent ) {
             break;
         }
