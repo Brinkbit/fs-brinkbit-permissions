@@ -76,6 +76,9 @@ module.exports.verify = ( user, operation, path ) => {
         if ( user === item.userId ) {
             permissions = item.permissions;
         }
+        else {
+            Promise.reject( 'user has no permissions on this object' );
+        }
     });
 
     // we now know where our path ends and what our user's permissions are on that end. time to test things
