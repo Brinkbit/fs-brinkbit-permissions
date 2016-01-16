@@ -30,9 +30,8 @@ module.exports.verify = ( user, operation, path ) => {
     lastParent = '';
 
     // iterate down the path,
-    i = 0;
     folderFail = false;
-    do {
+    for ( i = 0; i < pathArray.length; i++ ) {
         // add the next part of the path
         lastParent += '/' + pathArray[i];
 
@@ -58,8 +57,10 @@ module.exports.verify = ( user, operation, path ) => {
         }
 
         // if there is another level, increment
-        if ( isParent ) i++;
-    } while ( isParent );
+        if ( !isParent ) {
+            break;
+        }
+    }
 
     // determine if the file exists, eg, is an exact match
     fileExists = ( i === pathArray.length );
