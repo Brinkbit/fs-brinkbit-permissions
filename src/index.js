@@ -5,6 +5,7 @@ const s3Mongo = require( 'fs-s3-mongo' );
 const File = s3Mongo.schema.fileSchema;
 const Meta = s3Mongo.schema.metaDataSchema;
 
+
 /* eslint no-unused-vars: 0 */
 
 module.exports.verify = ( user, operation, path ) => {
