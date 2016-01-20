@@ -132,9 +132,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
         .then(() => {
             verifyLastParent( meta, lastParentPath, fullPath, user );
         })
-        .catch(( err ) => {
-            Promise.reject( err );
-        })
+
         .then(() => {
             // if it gets this far it's succeeded!
             // return the parent path and remaining path
@@ -142,5 +140,10 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 lastParentPath,
                 remainingPath: pathArray.slice( lastParentPath.split( '/' ), pathArray.length ),
             });
+        })
+        .catch(( err ) => {
+            if ( err.reason !== 'LAST PARENT' ) {
+                Promise.reject( err );
+            }
         });
 };
