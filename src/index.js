@@ -127,8 +127,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 meta = err.meta;
                 lastParentPath = err.lastParentPath;
             }
-            // this is the last parent. continue our logic
-            // BUT HOW DO WE KNOW WHICH PART IS THE ERR?
+        // this is the last parent. continue our logic
         })
         .then(() => {
             verifyLastParent( meta, lastParentPath, fullPath, user );
