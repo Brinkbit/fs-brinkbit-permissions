@@ -16,7 +16,7 @@ const Permissions = require( '../src/schemas/permissionSchema.js' );
 const s3Mongo = require( 'fs-s3-mongo' );
 const File = s3Mongo.schema.file;
 const Meta = s3Mongo.schema.meta;
-const fsPermissions = require( '/src/index.js' );
+const fsPermissions = require( '../src/index.js' );
 const verify = fsPermissions.verify;
 
 chai.use( sinonchai );
