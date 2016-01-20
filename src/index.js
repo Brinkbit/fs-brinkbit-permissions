@@ -85,15 +85,15 @@ module.exports.verify = ( user, operation, fullPath ) => {
 
                 // test permissions against various actions
                 if ( operation === 'read' &&
-                    permissions.read ) {
+                    !permissions.read ) {
                     throw new Error( 'user does not have read permissions on this object' );
                 }
                 if ( operation === 'write' || 'update' &&
-                    permissions.write ) {
+                    !permissions.write ) {
                     throw new Error( 'user does not have write permissions on this object' );
                 }
                 if ( operation === 'destroy' &&
-                    permissions.destroy ) {
+                    !permissions.destroy ) {
                     throw new Error( 'user does not have write permissions on this object' );
                 }
             }
