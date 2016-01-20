@@ -7,8 +7,6 @@ const Meta = s3Mongo.schema.meta;
 const mongoose = require( 'mongoose' );
 mongoose.Promise = global.Promise;
 
-
-/* eslint no-unused-vars: 0 */
 /* eslint no-shadow: 0 */
 
 module.exports.verify = ( user, operation, fullPath ) => {
