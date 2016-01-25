@@ -85,5 +85,8 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 }
             });
         }
+    })
+    .catch(( e ) => {
+        Promise.reject( e );
     });
 };
