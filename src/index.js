@@ -8,6 +8,7 @@ const mongoose = require( 'mongoose' );
 mongoose.Promise = global.Promise;
 
 /* eslint no-shadow: 0 */
+/* eslint no-else-return: 0 */
 
 function verifyPermissions( user, operation, file, isParent ) {
     // sanity check - verify the meta exists
@@ -86,6 +87,6 @@ module.exports.verify = ( user, operation, fullPath ) => {
         }
     })
     .catch(( e ) => {
-        Promise.reject( e );
+        return Promise.reject( e );
     });
 };
