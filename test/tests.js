@@ -5,6 +5,7 @@
 /* eslint no-unused-expressions: 0 */
 // todo: remove this after finishing tests
 /* eslint no-unused-vars: 0 */
+/* eslint no-shadow: 0 */
 
 const chai = require( 'chai' );
 const expect = chai.expect;
@@ -33,7 +34,7 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
     // for each level:
     pathVar.forEach(( value, index, array ) => {
         // create the meta
-        const meta = new Meta({
+        let meta = new Meta({
             guid: 'TESTDATA', // s3 guid
             get mimeType() {
                 let mimeVar;
@@ -54,42 +55,48 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                 }
             },
         });
-        meta.save();
-    // create the permission record
-        const permissions = new Permissions({
-            get resourceType() {
-                let resourceType;
-                if ( meta.mimeType === 'folder' ) {
-                    resourceType = 'folder';
-                }
-                else {
-                    resourceType = 'file';
-                }
-                return resourceType;
-            },  // project or file/folder and we can easily add additional resource types later
-            resourceId: meta.id, // links to metadata id or project id
-            appliesTo: 'user', // 'user', 'group', 'public'
-            userIdVar,
-            groupId: null, // if applies to group
-            read: true,
-            write: true,
-            destroy: true,
-            // share: [String], add additional user with default permissions for collaboration
-            manage: true, // update/remove existing permissions on resource
-        });
-        permissions.save();
-    // create the file record
-        const file = new File({
-            metaDataId: meta.id, // link to METADATA
-            userId: userIdVar, // link to User Collection
-            get name() {
-                return array.join( '/' ).slice( 0, index );
-            },
-            get parent() {
-                return array.join( '/' ).slice( 0, index - 1 );
-            },
-        });
-        file.save();
+        meta.save().exec()
+            .then(( metaObj ) => {
+                // overwrite meta with more meta
+                meta = metaObj;
+                // create the permission record
+                const permissions = new Permissions({
+                    get resourceType() {
+                        let resourceType;
+                        if ( meta.mimeType === 'folder' ) {
+                            resourceType = 'folder';
+                        }
+                        else {
+                            resourceType = 'file';
+                        }
+                        return resourceType;
+                    },  // project or file/folder and we can easily add additional resource types later
+                    resourceId: meta.id, // links to metadata id or project id
+                    appliesTo: 'user', // 'user', 'group', 'public'
+                    userIdVar,
+                    groupId: null, // if applies to group
+                    read: true,
+                    write: true,
+                    destroy: true,
+                    // share: [String], add additional user with default permissions for collaboration
+                    manage: true, // update/remove existing permissions on resource
+                });
+                return permissions.save().exec();
+            })
+            .then(() => {
+                // create the file record
+                const file = new File({
+                    metaDataId: meta.id, // link to METADATA
+                    userId: userIdVar, // link to User Collection
+                    get name() {
+                        return array.join( '/' ).slice( 0, index );
+                    },
+                    get parent() {
+                        return array.join( '/' ).slice( 0, index - 1 );
+                    },
+                });
+                return file.save().exec();
+            });
     });
 };
 
@@ -97,7 +104,7 @@ describe( 'verify', () => {
     // userId, path, operation
     const rejectUser = mongoose.Types.ObjectId();
     it( 'should allow reading a file with correct permissions', () => {
-        expect( verify( userId, '/level1/level2/level3/test.txt', 'read' )).to.be.fulfilled();
+        expect( verify( userId, 'read', '/level1/level2/level3/test.txt' )).to.be.fulfilled();
     });
     it( 'should reject reading a file with incorrect permissions', () => {
         expect( verify( rejectUser, '/level1/level2/level3/test.txt', 'read' ))
