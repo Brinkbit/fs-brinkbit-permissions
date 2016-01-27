@@ -82,6 +82,8 @@ function verifyPermissions( user, operation, file, isParent ) {
         });
 }
 
+module.exports.connect = mongoConnect();
+
 module.exports.verify = ( user, operation, fullPath ) => {
     // connect to mongo
     mongoConnect()
