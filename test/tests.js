@@ -101,6 +101,31 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
 };
 
 describe( 'verify', () => {
+    beforeEach( function beforeEach() {
+        insertFixture( path, userId );
+    });
+
+    afterEach( function afterEach() {
+        // make an array of all test meta ids
+        let ids;
+        Meta.find({ guid: 'TESTDATA' }).exec()
+        .then(( docs ) => {
+            ids = docs.map( function mapId( item ) {
+                return item._id;
+            });
+            // now remove all the things
+            Meta.remove({ _id: { $in: ids } })
+            .then(() => {
+                Permissions.remove({ resourceId: { $in: ids } });
+            })
+            .then(() => {
+                File.remove({ metaDataId: { $in: ids } });
+            });
+        })
+        .catch(( e ) => {
+            throw ( e );
+        });
+    });
     // userId, path, operation
     const rejectUser = mongoose.Types.ObjectId();
     it( 'should allow reading a file with correct permissions', () => {
