@@ -55,48 +55,48 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                 }
             },
         });
-        meta.save().exec()
-            .then(( metaObj ) => {
-                // overwrite meta with more meta
-                meta = metaObj;
-                // create the permission record
-                const permissions = new Permissions({
-                    get resourceType() {
-                        let resourceType;
-                        if ( meta.mimeType === 'folder' ) {
-                            resourceType = 'folder';
-                        }
-                        else {
-                            resourceType = 'file';
-                        }
-                        return resourceType;
-                    },  // project or file/folder and we can easily add additional resource types later
-                    resourceId: meta.id, // links to metadata id or project id
-                    appliesTo: 'user', // 'user', 'group', 'public'
-                    userIdVar,
-                    groupId: null, // if applies to group
-                    read: true,
-                    write: true,
-                    destroy: true,
-                    // share: [String], add additional user with default permissions for collaboration
-                    manage: true, // update/remove existing permissions on resource
-                });
-                return permissions.save().exec();
-            })
-            .then(() => {
-                // create the file record
-                const file = new File({
-                    metaDataId: meta.id, // link to METADATA
-                    userId: userIdVar, // link to User Collection
-                    get name() {
-                        return array.join( '/' ).slice( 0, index );
-                    },
-                    get parent() {
-                        return array.join( '/' ).slice( 0, index - 1 );
-                    },
-                });
-                return file.save().exec();
+        meta.save()
+        .then(( metaObj ) => {
+            // overwrite meta with more meta
+            meta = metaObj;
+            // create the permission record
+            const permissions = new Permissions({
+                get resourceType() {
+                    let resourceType;
+                    if ( meta.mimeType === 'folder' ) {
+                        resourceType = 'folder';
+                    }
+                    else {
+                        resourceType = 'file';
+                    }
+                    return resourceType;
+                },  // project or file/folder and we can easily add additional resource types later
+                resourceId: meta.id, // links to metadata id or project id
+                appliesTo: 'user', // 'user', 'group', 'public'
+                userIdVar,
+                groupId: null, // if applies to group
+                read: true,
+                write: true,
+                destroy: true,
+                // share: [String], add additional user with default permissions for collaboration
+                manage: true, // update/remove existing permissions on resource
             });
+            return permissions.save().exec();
+        })
+        .then(() => {
+            // create the file record
+            const file = new File({
+                metaDataId: meta.id, // link to METADATA
+                userId: userIdVar, // link to User Collection
+                get name() {
+                    return array.join( '/' ).slice( 0, index );
+                },
+                get parent() {
+                    return array.join( '/' ).slice( 0, index - 1 );
+                },
+            });
+            return file.save().exec();
+        });
     });
 };
 
