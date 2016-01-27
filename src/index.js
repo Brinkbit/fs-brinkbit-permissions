@@ -12,22 +12,30 @@ const Meta = s3Mongo.schema.meta;
 mongoose.Promise = Promise;
 
 function mongoConnect() {
-    let mongoAddress;
-    if ( process.env.NODE_ENV === 'development' ) {
-        mongoAddress = 'mongodb://' + process.env.IP + ':27017';
+    // check to see if we're already connected
+    if ( conn.readyState === 2 ) {
+        // if so, begin
+        return Promise.resolve();
     }
+    // if not, connect
     else {
-        mongoAddress = 'mongodb://localhost:27017';
+        let mongoAddress;
+        if ( process.env.NODE_ENV === 'development' ) {
+            mongoAddress = 'mongodb://' + process.env.IP + ':27017';
+        }
+        else {
+            mongoAddress = 'mongodb://localhost:27017';
+        }
+
+        mongoose.connect( mongoAddress );
+        conn.on( 'error', ( err ) => {
+            return Promise.reject( err );
+        });
+
+        conn.on( 'connected', () => {
+            return Promise.resolve();
+        });
     }
-
-    mongoose.connect( mongoAddress );
-    conn.on( 'error', () => {
-        Promise.reject( 'mongo connection failed' );
-    });
-
-    conn.on( 'connected', () => {
-        Promise.resolve();
-    });
 }
 
 function verifyPermissions( user, operation, file, isParent ) {
