@@ -1,14 +1,34 @@
 'use strict';
 
+/* eslint no-shadow: 0 */
+/* eslint no-else-return: 0 */
+
+const mongoose = require( 'mongoose' );
+const conn = mongoose.connection;
 const Permissions = require( './schemas/permissionSchema.js' );
 const s3Mongo = require( 'fs-s3-mongo' );
 const File = s3Mongo.schema.file;
 const Meta = s3Mongo.schema.meta;
-const mongoose = require( 'mongoose' );
-mongoose.Promise = global.Promise;
+mongoose.Promise = Promise;
 
-/* eslint no-shadow: 0 */
-/* eslint no-else-return: 0 */
+function mongoConnect() {
+    let mongoAddress;
+    if ( process.env.NODE_ENV === 'development' ) {
+        mongoAddress = 'mongodb://' + process.env.IP + ':27017';
+    }
+    else {
+        mongoAddress = 'mongodb://localhost:27017';
+    }
+
+    mongoose.connect( mongoAddress );
+    conn.on( 'error', () => {
+        Promise.reject( 'mongo connection failed' );
+    });
+
+    conn.on( 'connected', () => {
+        Promise.resolve();
+    });
+}
 
 function verifyPermissions( user, operation, file, isParent ) {
     // sanity check - verify the meta exists
@@ -55,8 +75,12 @@ function verifyPermissions( user, operation, file, isParent ) {
 }
 
 module.exports.verify = ( user, operation, fullPath ) => {
-    // determine if this file (full path) currently exists
-    File.findOne({ $and: [{ name: fullPath }, { userId: user }] }).exec()
+    // connect to mongo
+    mongoConnect()
+    .then(() => {
+        // determine if this file (full path) currently exists
+        return File.findOne({ $and: [{ name: fullPath }, { userId: user }] }).exec();
+    })
     .then(( file ) => {
         // a file must exist for certain operations
         if ( !file && operation === 'read' || 'update' || 'destroy' ) {

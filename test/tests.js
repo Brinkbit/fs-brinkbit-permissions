@@ -104,28 +104,28 @@ describe( 'verify', () => {
     // userId, path, operation
     const rejectUser = mongoose.Types.ObjectId();
     it( 'should allow reading a file with correct permissions', () => {
-        expect( verify( userId, 'read', '/level1/level2/level3/test.txt' )).to.be.fulfilled();
+        expect( verify( userId, 'read', '/level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject reading a file with incorrect permissions', () => {
         expect( verify( rejectUser, '/level1/level2/level3/test.txt', 'read' ))
             .to.be.rejectedWith( 'user does not have read permissions on this object' );
     });
     it( 'should allow updating a file with correct permissions', () => {
-        expect( verify( userId, '/level1/level2/level3/test.txt', 'update' )).to.be.fulfilled();
+        expect( verify( userId, '/level1/level2/level3/test.txt', 'update' )).to.be.fulfilled;
     });
     it( 'should reject updating a file with incorrect permissions', () => {
         expect( verify( rejectUser, '/level1/level2/level3/test.txt', 'update' ))
             .to.be.rejectedWith( 'user does not have write permissions on this object' );
     });
     it( 'should allow destroying a file with correct permissions', () => {
-        expect( verify( userId, '/level1/level2/level3/test.txt', 'destroy' )).to.be.fulfilled();
+        expect( verify( userId, '/level1/level2/level3/test.txt', 'destroy' )).to.be.fulfilled;
     });
     it( 'should reject destroying a file with incorrect permissions', () => {
         expect( verify( rejectUser, '/level1/level2/level3/test.txt', 'destroy' ))
             .to.be.rejectedWith( 'user does not have write permissions on this object' );
     });
     it( 'should allow insertion of a file with correct permissions on the parent folder', () => {
-        expect( verify( userId, '/level1/level2/permissions1.txt', 'write' )).to.be.fulfilled();
+        expect( verify( userId, '/level1/level2/permissions1.txt', 'write' )).to.be.fulfilled;
     });
     it( 'should reject insertion of a file with incorrect permissions on the parent folder', () => {
         expect( verify( rejectUser, '/level1/level2/permissions2.txt', 'write' ))
