@@ -14,7 +14,7 @@ mongoose.Promise = Promise;
 
 function mongoConnect() {
     // check to see if we're already connected
-    if ( conn.readyState === 2 ) {
+    if ( conn.readyState === 1 ) {
         // if so, begin
         return Promise.resolve();
     }

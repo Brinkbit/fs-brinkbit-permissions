@@ -55,7 +55,7 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                 }
             },
         });
-        meta.save()
+        return meta.save()
             .then(( metaObj ) => {
                 // overwrite meta with more meta
                 meta = metaObj;
