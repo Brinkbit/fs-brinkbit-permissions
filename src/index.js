@@ -2,6 +2,7 @@
 
 /* eslint no-shadow: 0 */
 /* eslint no-else-return: 0 */
+/* eslint new-cap: 0 */
 
 const mongoose = require( 'mongoose' );
 const conn = mongoose.connection;
@@ -89,7 +90,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
     mongoConnect()
     .then(() => {
         // determine if this file (full path) currently exists
-        return File.findOne({ $and: [{ name: fullPath }, { userId: user }] }).exec();
+        return File.findOne({ $and: [{ name: fullPath }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
     })
     .then(( file ) => {
         // a file must exist for certain operations
