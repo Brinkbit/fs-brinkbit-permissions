@@ -94,7 +94,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
     })
     .then(( file ) => {
         // a file must exist for certain operations
-        if ( !file && operation === 'read' || 'update' || 'destroy' ) {
+        if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
             return Promise.reject( 'object does not exist' );
         }
 
