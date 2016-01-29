@@ -73,7 +73,7 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                     },  // project or file/folder and we can easily add additional resource types later
                     resourceId: meta.id, // links to metadata id or project id
                     appliesTo: 'user', // 'user', 'group', 'public'
-                    userIdVar,
+                    userId: userIdVar,
                     groupId: null, // if applies to group
                     read: true,
                     write: true,
@@ -154,7 +154,8 @@ describe( 'verify', ( ) => {
     userId = userId.toString();
     const rejectUser = new mongoose.Types.ObjectId().toString();
     it( 'should allow reading a file with correct permissions', () => {
-        expect( verify( userId, 'read', 'level1/level2/level3/test.txt' )).to.be.fulfilled;
+        // return expect(Promise.resolve({ foo: "bar" })).to.be.fulfilled;
+        return expect( verify( userId, 'read', 'level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject reading a file with incorrect permissions', () => {
         expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'read' ))

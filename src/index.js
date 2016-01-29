@@ -41,7 +41,7 @@ function mongoConnect() {
 
 function verifyPermissions( user, operation, file, isParent ) {
     // sanity check - verify the meta exists
-    return Meta.find({ _id: file.metaDataId }).exec()
+    return Meta.findById( file.metaDataId ).exec()
         .then(( meta ) => {
             // if the meta does not exist, something has gone very wrong
             if ( !meta ) {
@@ -54,7 +54,7 @@ function verifyPermissions( user, operation, file, isParent ) {
             // if it passes all the above, return the permissions
             else {
                 // get the permissions
-                return Permissions.find({ $and: [{ resourceId: meta._id }, { userId: user }] }).exec();
+                return Permissions.findOne({ $and: [{ resourceId: meta._id }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
             }
         })
         .then(( permissions ) => {
@@ -120,6 +120,9 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 }
             });
         }
+    })
+    .then(() => {
+        return Promise.resolve();
     })
     .catch(( e ) => {
         return Promise.reject( e );
