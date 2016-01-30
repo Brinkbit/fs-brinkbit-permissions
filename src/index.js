@@ -96,7 +96,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
             .then(( file ) => {
                 // a file must exist for certain operations
                 if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
-                    return Promise.reject( 'RESOURCE_NOT_FOUND' );
+                    return Promise.reject( 'RESOURCE_NOT_FOUND2' );
                 }
 
                 // can't exist for write

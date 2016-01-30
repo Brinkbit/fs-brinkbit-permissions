@@ -126,6 +126,7 @@ describe( 'verify', ( ) => {
         });
     });
 
+    /*
     afterEach( function afterEach( done ) {
         // make an array of all test meta ids
         let ids;
@@ -148,6 +149,7 @@ describe( 'verify', ( ) => {
             throw ( e );
         });
     });
+    */
     // userId, path, operation
     userId = userId.toString();
     const rejectUser = new mongoose.Types.ObjectId().toString();
@@ -156,38 +158,38 @@ describe( 'verify', ( ) => {
         return expect( verify( userId, 'read', 'level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject reading a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'read' ))
+        return expect( verify( rejectUser, 'read', 'level1/level2/level3/test.txt' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow updating a file with correct permissions', () => {
-        return expect( verify( userId, 'level1/level2/level3/test.txt', 'update' )).to.be.fulfilled;
+        return expect( verify( userId, 'update', 'level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject updating a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'update' ))
+        return expect( verify( rejectUser, 'update', 'level1/level2/level3/test.txt' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow destroying a file with correct permissions', () => {
-        return expect( verify( userId, '/level1/level2/level3/test.txt', 'destroy' )).to.be.fulfilled;
+        return expect( verify( userId, 'destroy', '/level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject destroying a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'destroy' ))
+        return expect( verify( rejectUser, 'destroy', 'level1/level2/level3/test.txt' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow insertion of a file with correct permissions on the parent folder', () => {
-        return expect( verify( userId, 'level1/level2/permissions1.txt', 'write' )).to.be.fulfilled;
+        return expect( verify( userId, 'write', 'level1/level2/permissions1.txt' )).to.be.fulfilled;
     });
     it( 'should reject insertion of a file with incorrect permissions on the parent folder', () => {
-        return expect( verify( rejectUser, 'level1/level2/permissions2.txt', 'write' ))
+        return expect( verify( rejectUser, 'write', 'level1/level2/permissions2.txt' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     // should not treat a file as a folder
     it( 'not allow insertion of a file into another file', () => {
-        return expect( verify( userId, 'level1/level2/level3/test.txt/nestedTest.txt', 'write' ))
+        return expect( verify( userId, 'write', 'level1/level2/level3/test.txt/nestedTest.txt' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     // should not create a duplicate file
     it( 'not allow insertion of a duplicate file', () => {
-        return expect( verify( userId, 'level1/level2/level3/test.txt', 'write' ))
+        return expect( verify( userId, 'write', 'level1/level2/level3/test.txt' ))
             .to.be.rejectedWith( 'RESOURCE_EXISTS' );
     });
 });
