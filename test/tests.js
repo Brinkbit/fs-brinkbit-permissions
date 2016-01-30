@@ -157,37 +157,37 @@ describe( 'verify', ( ) => {
     });
     it( 'should reject reading a file with incorrect permissions', () => {
         return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'read' ))
-            .to.be.rejectedWith( 'user does not have read permissions on this object' );
+            .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow updating a file with correct permissions', () => {
         return expect( verify( userId, 'level1/level2/level3/test.txt', 'update' )).to.be.fulfilled;
     });
     it( 'should reject updating a file with incorrect permissions', () => {
         return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'update' ))
-            .to.be.rejectedWith( 'user does not have write permissions on this object' );
+            .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow destroying a file with correct permissions', () => {
         return expect( verify( userId, '/level1/level2/level3/test.txt', 'destroy' )).to.be.fulfilled;
     });
     it( 'should reject destroying a file with incorrect permissions', () => {
         return expect( verify( rejectUser, 'level1/level2/level3/test.txt', 'destroy' ))
-            .to.be.rejectedWith( 'user does not have write permissions on this object' );
+            .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow insertion of a file with correct permissions on the parent folder', () => {
         return expect( verify( userId, 'level1/level2/permissions1.txt', 'write' )).to.be.fulfilled;
     });
     it( 'should reject insertion of a file with incorrect permissions on the parent folder', () => {
         return expect( verify( rejectUser, 'level1/level2/permissions2.txt', 'write' ))
-            .to.be.rejectedWith( 'user does not have write permissions on this object' );
+            .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     // should not treat a file as a folder
     it( 'not allow insertion of a file into another file', () => {
         return expect( verify( userId, 'level1/level2/level3/test.txt/nestedTest.txt', 'write' ))
-            .to.be.rejectedWith( 'tried to add object to file' );
+            .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     // should not create a duplicate file
     it( 'not allow insertion of a duplicate file', () => {
         return expect( verify( userId, 'level1/level2/level3/test.txt', 'write' ))
-            .to.be.rejectedWith( 'object already exists at that path' );
+            .to.be.rejectedWith( 'RESOURCE_EXISTS' );
     });
 });

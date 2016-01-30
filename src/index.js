@@ -45,11 +45,11 @@ function verifyPermissions( user, operation, file, isParent ) {
         .then(( meta ) => {
             // if the meta does not exist, something has gone very wrong
             if ( !meta ) {
-                return Promise.reject( 'INVALID_RESOURCE' );
+                return Promise.reject( 'RESOURCE_NOT_FOUND' );
             }
             // if this is a parent, we need to make sure it's a folder
             else if ( isParent && meta.mimeType !== 'folder' ) {
-                return Promise.reject( 'PARENT_IS_NOT_A_FOLDER' );
+                return Promise.reject( 'NOT_ALLOWED' );
             }
             // if it passes all the above, return the permissions
             else {
@@ -59,21 +59,21 @@ function verifyPermissions( user, operation, file, isParent ) {
         })
         .then(( permissions ) => {
             if ( !permissions ) {
-                return Promise.reject( 'USER_HAS_NO_PERMISSIONS_ON_THIS_OBJECT' );
+                return Promise.reject( 'NOT_ALLOWED' );
             }
             else {
                 // time to run the permissions
                 if ( operation === 'read' &&
                     !permissions.read ) {
-                    return Promise.reject( 'USER_DOES_NOT_HAVE_READ_PERMISSIONS_ON_THIS_OBJECT' );
+                    return Promise.reject( 'NOT_ALLOWED' );
                 }
                 else if ( operation === 'write' || 'update' &&
                     !permissions.write ) {
-                    return Promise.reject( 'USER_DOES_NOT_HAVE_WRITE_PERMISSIONS_ON_THIS_OBJECT' );
+                    return Promise.reject( 'NOT_ALLOWED' );
                 }
                 else if ( operation === 'destroy' &&
                     !permissions.destroy ) {
-                    return Promise.reject( 'USER_DOES_NOT_HAVE_DESTROY_PERMISSIONS_ON_THIS_OBJECT' );
+                    return Promise.reject( 'NOT_ALLOWED' );
                 }
                 else {
                     // if we've made it this far, we're good to go!
@@ -96,12 +96,12 @@ module.exports.verify = ( user, operation, fullPath ) => {
             .then(( file ) => {
                 // a file must exist for certain operations
                 if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
-                    return Promise.reject( 'object does not exist' );
+                    return Promise.reject( 'RESOURCE_NOT_FOUND' );
                 }
 
                 // can't exist for write
                 else if ( file && operation === 'write' ) {
-                    return Promise.reject( 'object already exists at that path' );
+                    return Promise.reject( 'RESOURCE_EXISTS' );
                 }
 
                 // if this is a file, perform verification on the file
