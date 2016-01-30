@@ -48,7 +48,8 @@ function verifyPermissions( user, operation, file, isParent ) {
             if ( !meta ) {
                 return Promise.reject( 'RESOURCE_NOT_FOUND' );
             }
-            // if this is a parent, we need to make sure it's a folder
+            // if this is a parent, we need to make sure it's a folder. don't want to insert one file into another
+            // this should have already been caught, but doesn't hurt to double-chcek
             else if ( isParent && meta.mimeType !== 'folder' ) {
                 return Promise.reject( 'NOT_ALLOWED' );
             }
@@ -68,7 +69,9 @@ function verifyPermissions( user, operation, file, isParent ) {
                     !permissions.read ) {
                     return Promise.reject( 'NOT_ALLOWED' );
                 }
-                else if ( operation === 'write' || 'update' &&
+                else if ( operation === 'write' &&
+                    !permissions.write ||
+                    operation === 'update' &&
                     !permissions.write ) {
                     return Promise.reject( 'NOT_ALLOWED' );
                 }
@@ -81,6 +84,9 @@ function verifyPermissions( user, operation, file, isParent ) {
                     return Promise.resolve();
                 }
             }
+        })
+        .catch(( e ) => {
+            return Promise.reject( e );
         });
 }
 
@@ -118,6 +124,8 @@ module.exports.verify = ( user, operation, fullPath ) => {
                     return File.findOne({ $and: [{ name: fullPathSplit.join( '/' ) + '/' }, { userId: user }] }).exec()
                         .then(( file ) => {
                             // if the parent does not exist, we have a problem
+                            // this will also fire if we try to insert one file into another, because the
+                            // trailing '/' will prevent the query from finding anything
                             if ( !file ) {
                                 return Promise.reject( 'INVALID_RESOURCE_PATH' );
                             }

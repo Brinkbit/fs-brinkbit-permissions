@@ -229,7 +229,7 @@ describe( 'verify', ( ) => {
     // should not treat a file as a folder
     it( 'not allow insertion of a file into another file', () => {
         return expect( verify( acceptUser, 'write', 'level1/level2/level3/test.txt/nestedTest.txt' ))
-            .to.be.rejectedWith( 'NOT_ALLOWED' );
+            .to.be.rejectedWith( 'INVALID_RESOURCE_PATH' );
     });
     // should not create a duplicate file
     it( 'not allow insertion of a duplicate file', () => {
