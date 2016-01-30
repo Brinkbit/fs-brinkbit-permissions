@@ -3,6 +3,7 @@
 /* eslint no-shadow: 0 */
 /* eslint no-else-return: 0 */
 /* eslint new-cap: 0 */
+/* eslint prefer-const: 0 */
 
 const mongoose = require( 'mongoose' );
 const conn = mongoose.connection;
@@ -112,7 +113,9 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 }
                 // otherwise perform verification on the parent
                 else {
-                    return File.findOne({ $and: [{ name: fullPath.split( '/' ).pop() }, { userId: user }] }).exec()
+                    let fullPathSplit = fullPath.split( '/' );
+                    fullPathSplit.pop();
+                    return File.findOne({ $and: [{ name: fullPathSplit.join( '/' ) }, { userId: user }] }).exec()
                         .then(( file ) => {
                             // if the parent does not exist, we have a problem
                             if ( !file ) {
