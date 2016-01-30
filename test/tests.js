@@ -170,7 +170,7 @@ describe( 'verify', ( ) => {
         });
     });
 
-    /*
+
     afterEach( function afterEach( done ) {
         // make an array of all test meta ids
         let ids;
@@ -180,20 +180,19 @@ describe( 'verify', ( ) => {
                 return item._id;
             });
             // now remove all the things
-            Meta.remove({ _id: { $in: ids } })
-            .then(() => {
-                Permissions.remove({ resourceId: { $in: ids } });
-            })
-            .then(() => {
-                File.remove({ metaDataId: { $in: ids } });
-            })
-            .then( done());
+            const promises = {
+                metas: Meta.remove({ _id: { $in: ids } }),
+                permissions: Permissions.remove({ resourceId: { $in: ids } }),
+                files: File.remove({ metaDataId: { $in: ids } }),
+            };
+            return Promise.all( promises );
         })
+        .then( done())
         .catch(( e ) => {
             throw ( e );
         });
     });
-    */
+
     // userId, path, operation
     acceptUser = acceptUser.toString();
     rejectUser = rejectUser.toString();
