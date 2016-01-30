@@ -101,7 +101,7 @@ const insertFixture = function insertFixture( pathVar ) {
                     write: false,
                     destroy: false,
                     // share: [String], add additional user with default permissions for collaboration
-                    manage: true, // update/remove existing permissions on resource
+                    manage: false, // update/remove existing permissions on resource
                 });
                 // create the good file record
                 const goodFile = new File({
@@ -213,7 +213,7 @@ describe( 'verify', ( ) => {
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow destroying a file with correct permissions', () => {
-        return expect( verify( acceptUser, 'destroy', '/level1/level2/level3/test.txt' )).to.be.fulfilled;
+        return expect( verify( acceptUser, 'destroy', 'level1/level2/level3/test.txt' )).to.be.fulfilled;
     });
     it( 'should reject destroying a file with incorrect permissions', () => {
         return expect( verify( rejectUser, 'destroy', 'level1/level2/level3/test.txt' ))
