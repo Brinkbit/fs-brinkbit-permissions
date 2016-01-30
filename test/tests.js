@@ -107,9 +107,6 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
                 });
                 return file.save();
             })
-            .then(() => {
-                console.log( 'file finished' );
-            })
             .catch(( e ) => {
                 return Promise.reject( e );
             });
@@ -117,9 +114,10 @@ const insertFixture = function insertFixture( pathVar, userIdVar ) {
     return Promise.all( promises );
 };
 
+
 describe( 'verify', ( ) => {
     beforeEach( function beforeEach( done ) {
-        insertFixture( path, userId )
+        return insertFixture( path, userId )
         .then(() => {
             done();
         })

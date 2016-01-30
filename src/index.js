@@ -86,45 +86,47 @@ function verifyPermissions( user, operation, file, isParent ) {
 module.exports.connect = mongoConnect();
 
 module.exports.verify = ( user, operation, fullPath ) => {
-    // connect to mongo
-    mongoConnect()
-    .then(() => {
-        // determine if this file (full path) currently exists
-        return File.findOne({ $and: [{ name: fullPath }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
-    })
-    .then(( file ) => {
-        // a file must exist for certain operations
-        if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
-            return Promise.reject( 'object does not exist' );
-        }
-
-        // can't exist for write
-        else if ( file && operation === 'write' ) {
-            return Promise.reject( 'object already exists at that path' );
-        }
-
-        // if this is a file, perform verification on the file
-        if ( file ) {
-            return verifyPermissions( user, operation, file, false );
-        }
-        // otherwise perform verification on the parent
-        else {
-            return File.findOne({ $and: [{ name: fullPath.split( '/' ).pop() }, { userId: user }] }).exec()
+    return new Promise(( resolve, reject ) => {
+        // connect to mongo
+        mongoConnect()
+            .then(() => {
+                // determine if this file (full path) currently exists
+                return File.findOne({ $and: [{ name: fullPath }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
+            })
             .then(( file ) => {
-                // if the parent does not exist, we have a problem
-                if ( !file ) {
-                    return Promise.reject( 'INVALID_RESOURCE_PATH' );
+                // a file must exist for certain operations
+                if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
+                    return Promise.reject( 'object does not exist' );
                 }
+
+                // can't exist for write
+                else if ( file && operation === 'write' ) {
+                    return Promise.reject( 'object already exists at that path' );
+                }
+
+                // if this is a file, perform verification on the file
+                if ( file ) {
+                    return verifyPermissions( user, operation, file, false );
+                }
+                // otherwise perform verification on the parent
                 else {
-                    return verifyPermissions( user, operation, file, true );
+                    return File.findOne({ $and: [{ name: fullPath.split( '/' ).pop() }, { userId: user }] }).exec()
+                        .then(( file ) => {
+                            // if the parent does not exist, we have a problem
+                            if ( !file ) {
+                                return Promise.reject( 'INVALID_RESOURCE_PATH' );
+                            }
+                            else {
+                                return verifyPermissions( user, operation, file, true );
+                            }
+                        });
                 }
+            })
+            .then(() => {
+                resolve();
+            })
+            .catch(( e ) => {
+                reject( e );
             });
-        }
-    })
-    .then(() => {
-        return Promise.resolve();
-    })
-    .catch(( e ) => {
-        return Promise.reject( e );
     });
 };
