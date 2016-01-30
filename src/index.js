@@ -39,33 +39,41 @@ function mongoConnect() {
     }
 }
 
-function verifyPermissions( user, operation, meta, isParent ) {
+function verifyPermissions( user, operation, file, isParent ) {
     // sanity check - verify the meta exists
-    if ( !meta ) {
-        return Promise.reject( 'RESOURCE_NOT_FOUND' );
-    }
-    // if this is a parent, we need to make sure it's a folder
-    else if ( isParent && meta.mimeType !== 'folder' ) {
-        return Promise.reject( 'NOT_ALLOWED' );
-    }
-    // if it passes all the above, return the permissions
-    else {
-        // get the permissions
-        return Permissions.findOne({ $and: [{ resourceId: meta._id }, { userId: mongoose.Types.ObjectId( user ) }] }).exec()
+    return Meta.findById( file.metaDataId ).exec()
+        .then(( meta ) => {
+            // if the meta does not exist, something has gone very wrong
+            if ( !meta ) {
+                return Promise.reject( 'INVALID_RESOURCE' );
+            }
+            // if this is a parent, we need to make sure it's a folder
+            else if ( isParent && meta.mimeType !== 'folder' ) {
+                return Promise.reject( 'PARENT_IS_NOT_A_FOLDER' );
+            }
+            // if it passes all the above, return the permissions
+            else {
+                // get the permissions
+                return Permissions.findOne({ $and: [{ resourceId: meta._id }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
+            }
+        })
         .then(( permissions ) => {
             if ( !permissions ) {
-                return Promise.reject( 'NOT_ALLOWED' );
+                return Promise.reject( 'USER_HAS_NO_PERMISSIONS_ON_THIS_OBJECT' );
             }
             else {
                 // time to run the permissions
-                if ( operation === 'read' && !permissions.read ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
+                if ( operation === 'read' &&
+                    !permissions.read ) {
+                    return Promise.reject( 'USER_DOES_NOT_HAVE_READ_PERMISSIONS_ON_THIS_OBJECT' );
                 }
-                else if ( operation === 'write' || 'update' && !permissions.write ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
+                else if ( operation === 'write' || 'update' &&
+                    !permissions.write ) {
+                    return Promise.reject( 'USER_DOES_NOT_HAVE_WRITE_PERMISSIONS_ON_THIS_OBJECT' );
                 }
-                else if ( operation === 'destroy' && !permissions.destroy ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
+                else if ( operation === 'destroy' &&
+                    !permissions.destroy ) {
+                    return Promise.reject( 'USER_DOES_NOT_HAVE_DESTROY_PERMISSIONS_ON_THIS_OBJECT' );
                 }
                 else {
                     // if we've made it this far, we're good to go!
@@ -73,7 +81,6 @@ function verifyPermissions( user, operation, meta, isParent ) {
                 }
             }
         });
-    }
 }
 
 module.exports.connect = mongoConnect();
@@ -83,47 +90,35 @@ module.exports.verify = ( user, operation, fullPath ) => {
         // connect to mongo
         mongoConnect()
             .then(() => {
-                // find a file record pointing to the meta
-                return File.findOne({ name: fullPath }).exec();
+                // determine if this file (full path) currently exists
+                return File.findOne({ $and: [{ name: fullPath }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
             })
             .then(( file ) => {
-                // if there's no file, the meta clearly doesn't exist
-                if ( !file ) {
-                    return null;
-                }
-                else {
-                    return Meta.findById( file.metaDataId ).exec();
-                }
-            })
-            .then(( meta ) => {
-                // an object must exist for certain operations
-                if ( !meta && ( operation === 'read' || 'update' || 'destroy' )) {
-                    return Promise.reject( 'RESOURCE_NOT_FOUND' );
+                // a file must exist for certain operations
+                if ( !file && ( operation === 'read' || 'update' || 'destroy' )) {
+                    return Promise.reject( 'object does not exist' );
                 }
 
                 // can't exist for write
-                else if ( meta && operation === 'write' ) {
-                    return Promise.reject( 'RESOURCE_EXISTS' );
+                else if ( file && operation === 'write' ) {
+                    return Promise.reject( 'object already exists at that path' );
                 }
 
-                // if this object exists, perform verification on the object
-                if ( meta ) {
-                    return verifyPermissions( user, operation, meta, false );
+                // if this is a file, perform verification on the file
+                if ( file ) {
+                    return verifyPermissions( user, operation, file, false );
                 }
                 // otherwise perform verification on the parent
                 else {
-                    return File.findOne({ name: fullPath.split( '/' ).pop() }, { userId: user }).exec()
+                    return File.findOne({ $and: [{ name: fullPath.split( '/' ).pop() }, { userId: user }] }).exec()
                         .then(( file ) => {
-                            // if there's no file, the meta clearly doesn't exist
+                            // if the parent does not exist, we have a problem
                             if ( !file ) {
-                                return Promise.reject( 'RESOURCE_NOT_FOUND' );
+                                return Promise.reject( 'INVALID_RESOURCE_PATH' );
                             }
                             else {
-                                return Meta.findById( file.metaDataId ).exec();
+                                return verifyPermissions( user, operation, file, true );
                             }
-                        })
-                        .then(( meta ) => {
-                            return verifyPermissions( user, operation, meta, true );
                         });
                 }
             })
