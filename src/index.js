@@ -115,7 +115,7 @@ module.exports.verify = ( user, operation, fullPath ) => {
                 else {
                     let fullPathSplit = fullPath.split( '/' );
                     fullPathSplit.pop();
-                    return File.findOne({ $and: [{ name: fullPathSplit.join( '/' ) }, { userId: user }] }).exec()
+                    return File.findOne({ $and: [{ name: fullPathSplit.join( '/' ) + '/' }, { userId: user }] }).exec()
                         .then(( file ) => {
                             // if the parent does not exist, we have a problem
                             if ( !file ) {
