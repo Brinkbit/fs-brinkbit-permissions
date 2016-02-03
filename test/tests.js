@@ -179,15 +179,15 @@ describe( 'verify', ( ) => {
             ids = docs.map( function mapId( item ) {
                 return item._id;
             });
+            const p1 = Meta.remove({ _id: { $in: ids } }).exec();
+            const p2 = Permissions.remove({ resourceId: { $in: ids } }).exec();
+            const p3 = File.remove({ metaDataId: { $in: ids } }).exec();
             // now remove all the things
-            const promises = {
-                metas: Meta.remove({ _id: { $in: ids } }),
-                permissions: Permissions.remove({ resourceId: { $in: ids } }),
-                files: File.remove({ metaDataId: { $in: ids } }),
-            };
-            return Promise.all( promises );
+            return Promise.all([ p1, p2, p3 ]);
         })
-        .then( done())
+        .then(() => {
+            done();
+        })
         .catch(( e ) => {
             throw ( e );
         });
