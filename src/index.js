@@ -10,7 +10,6 @@ const conn = mongoose.connection;
 const Permissions = require( './schemas/permissionSchema.js' );
 const s3Mongo = require( 'fs-s3-mongo' );
 const File = s3Mongo.schema.file;
-const Meta = s3Mongo.schema.meta;
 mongoose.Promise = Promise;
 
 function mongoConnect() {
@@ -41,53 +40,45 @@ function mongoConnect() {
 }
 
 function verifyPermissions( user, operation, file, isParent ) {
-    // sanity check - verify the meta exists
-    return Meta.findById( file.metaDataId ).exec()
-        .then(( meta ) => {
-            // if the meta does not exist, something has gone very wrong
-            if ( !meta ) {
-                return Promise.reject( 'RESOURCE_NOT_FOUND' );
-            }
-            // if this is a parent, we need to make sure it's a folder. don't want to insert one file into another
-            // this should have already been caught, but doesn't hurt to double-chcek
-            else if ( isParent && meta.mimeType !== 'folder' ) {
+        // if this is a parent, we need to make sure it's a folder. don't want to insert one file into another
+        // this should have already been caught, but doesn't hurt to double-chcek
+    if ( isParent && file.mimeType !== 'folder' ) {
+        return Promise.reject( 'NOT_ALLOWED' );
+    }
+        // if it passes all the above, return the permissions
+    else {
+        // get the permissions
+        return Permissions.findOne({ $and: [{ resourceId: file._id }, { userId: mongoose.Types.ObjectId( user ) }] }).exec()
+    .then(( permissions ) => {
+        if ( !permissions ) {
+            return Promise.reject( 'NOT_ALLOWED' );
+        }
+        else {
+            // time to run the permissions
+            if ( operation === 'read' &&
+                !permissions.read ) {
                 return Promise.reject( 'NOT_ALLOWED' );
             }
-            // if it passes all the above, return the permissions
-            else {
-                // get the permissions
-                return Permissions.findOne({ $and: [{ resourceId: meta._id }, { userId: mongoose.Types.ObjectId( user ) }] }).exec();
+            else if ( operation === 'write' &&
+                !permissions.write ||
+                operation === 'update' &&
+                !permissions.write ) {
+                return Promise.reject( 'NOT_ALLOWED' );
             }
-        })
-        .then(( permissions ) => {
-            if ( !permissions ) {
+            else if ( operation === 'destroy' &&
+                !permissions.destroy ) {
                 return Promise.reject( 'NOT_ALLOWED' );
             }
             else {
-                // time to run the permissions
-                if ( operation === 'read' &&
-                    !permissions.read ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
-                }
-                else if ( operation === 'write' &&
-                    !permissions.write ||
-                    operation === 'update' &&
-                    !permissions.write ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
-                }
-                else if ( operation === 'destroy' &&
-                    !permissions.destroy ) {
-                    return Promise.reject( 'NOT_ALLOWED' );
-                }
-                else {
-                    // if we've made it this far, we're good to go!
-                    return Promise.resolve();
-                }
+                // if we've made it this far, we're good to go!
+                return Promise.resolve();
             }
-        })
-        .catch(( e ) => {
-            return Promise.reject( e );
-        });
+        }
+    })
+    .catch(( e ) => {
+        return Promise.reject( e );
+    });
+    }
 }
 
 module.exports.connect = mongoConnect();

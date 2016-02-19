@@ -35,8 +35,8 @@ const insertFixture = function insertFixture( pathVar ) {
     // for each level:
     const promises = pathVar.map(( value, index, array ) => {
         // create the meta
-        let meta = new Meta({
-            guid: 'TESTDATA', // s3 guid
+        const file = new File({
+            _id: 'TESTDATA',
             get mimeType() {
                 let mimeVar;
                 if ( index === array.length ) {
@@ -50,21 +50,29 @@ const insertFixture = function insertFixture( pathVar ) {
             size: 12345678,
             dateCreated: new Date(), // https://docs.mongodb.org/v3.0/reference/method/Date/
             lastModified: new Date(), // https://docs.mongodb.org/v3.0/reference/method/Date/
-            get children() {
-                if ( index !== array.length ) {
-                    return array[index + 1];
+            get parents() {
+                if ( index !== 0 ) {
+                    return array[index];
                 }
             },
+            get name() {
+                let name;
+                if ( array.length === index + 1 ) {
+                    name = array.join( '/' );
+                }
+                else {
+                    name = array.slice( 0, index + 1 ).join( '/' ) + '/';
+                }
+                return name;
+            },
         });
-        return meta.save()
-            .then(( metaObj ) => {
-                // overwrite meta with more meta
-                meta = metaObj;
+        return file.save()
+            .then(( fileObj ) => {
                 // create the permission record for the good user
                 const goodPermissions = new Permissions({
                     get resourceType() {
                         let resourceType;
-                        if ( meta.mimeType === 'folder' ) {
+                        if ( fileObj.mimeType === 'folder' ) {
                             resourceType = 'folder';
                         }
                         else {
@@ -72,7 +80,7 @@ const insertFixture = function insertFixture( pathVar ) {
                         }
                         return resourceType;
                     },  // project or file/folder and we can easily add additional resource types later
-                    resourceId: meta.id, // links to metadata id or project id
+                    resourceId: fileObj.id, // links to metadata id or project id
                     appliesTo: 'user', // 'user', 'group', 'public'
                     userId: acceptUser,
                     groupId: null, // if applies to group
@@ -85,7 +93,7 @@ const insertFixture = function insertFixture( pathVar ) {
                 const badPermissions = new Permissions({
                     get resourceType() {
                         let resourceType;
-                        if ( meta.mimeType === 'folder' ) {
+                        if ( fileObj.mimeType === 'folder' ) {
                             resourceType = 'folder';
                         }
                         else {
@@ -93,7 +101,7 @@ const insertFixture = function insertFixture( pathVar ) {
                         }
                         return resourceType;
                     },  // project or file/folder and we can easily add additional resource types later
-                    resourceId: meta.id, // links to metadata id or project id
+                    resourceId: fileObj.id, // links to metadata id or project id
                     appliesTo: 'user', // 'user', 'group', 'public'
                     userId: rejectUser,
                     groupId: null, // if applies to group
@@ -104,51 +112,9 @@ const insertFixture = function insertFixture( pathVar ) {
                     manage: false, // update/remove existing permissions on resource
                 });
                 // create the good file record
-                const goodFile = new File({
-                    metaDataId: meta.id, // link to METADATA
-                    userId: acceptUser, // link to User Collection
-                    get name() {
-                        let name;
-                        if ( array.length === index + 1 ) {
-                            name = array.join( '/' );
-                        }
-                        else {
-                            name = array.slice( 0, index + 1 ).join( '/' ) + '/';
-                        }
-                        return name;
-                    },
-                    get parent() {
-                        let parent;
-                        parent = array.slice( 0, index ).join( '/' );
-                        if ( parent ) parent += '/';
-                        return parent;
-                    },
-                });
-                const badFile = new File({
-                    metaDataId: meta.id, // link to METADATA
-                    userId: rejectUser, // link to User Collection
-                    get name() {
-                        let name;
-                        if ( array.length === index + 1 ) {
-                            name = array.join( '/' );
-                        }
-                        else {
-                            name = array.slice( 0, index + 1 ).join( '/' ) + '/';
-                        }
-                        return name;
-                    },
-                    get parent() {
-                        let parent;
-                        parent = array.slice( 0, index ).join( '/' );
-                        if ( parent ) parent += '/';
-                        return parent;
-                    },
-                });
                 return Promise.all([
                     goodPermissions.save(),
                     badPermissions.save(),
-                    goodFile.save(),
-                    badFile.save(),
                 ]);
             })
             .catch(( e ) => {
