@@ -10,38 +10,39 @@ const conn = mongoose.connection;
 const Permissions = require( './schemas/permissionSchema.js' );
 mongoose.Promise = Promise;
 
-function mongoConnect() {
-    // check to see if we're already connected
-    if ( conn.readyState === 1 ) {
-        // if so, begin
-        return Promise.resolve();
-    }
-    // if not, connect
-    else {
-        let mongoAddress;
-        if ( process.env.NODE_ENV === 'development' ) {
-            mongoAddress = 'mongodb://' + process.env.IP + ':27017';
+module.exports.connect = function mongoConnect() {
+    return new Promise(( resolve, reject ) => {
+        // check to see if we're already connected
+        if ( conn.readyState === 1 ) {
+            // if so, begin
+            resolve();
         }
+        // if not, connect
         else {
-            mongoAddress = 'mongodb://localhost:27017';
+            let mongoAddress;
+            if ( process.env.NODE_ENV === 'development' ) {
+                mongoAddress = 'mongodb://' + process.env.IP + ':27017';
+            }
+            else {
+                mongoAddress = 'mongodb://localhost:27017';
+            }
+
+            mongoose.connect( mongoAddress );
+            conn.on( 'error', ( err ) => {
+                reject( err );
+            });
+
+            conn.on( 'connected', () => {
+                resolve();
+            });
+            // if we get this far and nothing has happened, we assume mongo has not started
         }
-
-        mongoose.connect( mongoAddress );
-        conn.on( 'error', ( err ) => {
-            return Promise.reject( err );
-        });
-
-        conn.on( 'connected', () => {
-            return Promise.resolve();
-        });
-    }
-}
+    });
+};
 
 
-module.exports.connect = mongoConnect();
-
-module.exports.verify = ( userId, operation, guid ) => {
-    Permissions.findOne({ $and: [{ userId }, { guid }] }).exec()
+module.exports.verify = ( guid, userId, operation ) => {
+    return Permissions.findOne({ $and: [{ userId }, { resourceId: guid }] }).exec()
             .then(( permissions ) => {
                 if ( !permissions ) {
                     return Promise.reject( 'NOT_ALLOWED' );

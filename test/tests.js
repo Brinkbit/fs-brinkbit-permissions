@@ -26,7 +26,7 @@ const path = [ 'level1', 'level2', 'level3', 'test.txt' ];
 // stub the userid
 let acceptUser = new mongoose.Types.ObjectId();
 let rejectUser = new mongoose.Types.ObjectId();
-const testGuid = 'TESTGUID';
+const testGuid = new mongoose.Types.ObjectId();
 
 // create the meta and permissions
 const insertFixture = function insertFixture( pathVar ) {
@@ -80,9 +80,6 @@ const insertFixture = function insertFixture( pathVar ) {
             goodPermissions.save(),
             badPermissions.save(),
         ]);
-    })
-    .catch(( e ) => {
-        return Promise.reject( e );
     });
     return Promise.all( promises );
 };
@@ -90,18 +87,21 @@ const insertFixture = function insertFixture( pathVar ) {
 
 describe( 'verify', ( ) => {
     beforeEach( function beforeEach( done ) {
-        return insertFixture( path )
+        fsPermissions.connect()
         .then(() => {
-            done();
+            insertFixture( path )
+                .then(() => {
+                    done();
+                });
         })
         .catch(( e ) => {
-            throw ( e );
+            throw new Error( e );
         });
     });
 
 
     afterEach( function afterEach( done ) {
-        Permissions.remove({ resourceId: 'TESTGUID' }).exec()
+        Permissions.remove({ resourceId: testGuid }).exec()
         .then(() => {
             done();
         })
@@ -114,31 +114,31 @@ describe( 'verify', ( ) => {
     acceptUser = acceptUser.toString();
     rejectUser = rejectUser.toString();
     it( 'should allow reading a file with correct permissions', () => {
-        return expect( verify( acceptUser, 'read', testGuid )).to.be.fulfilled;
+        return expect( verify( testGuid, acceptUser, 'read' )).to.be.fulfilled;
     });
     it( 'should reject reading a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'read', testGuid ))
+        return expect( verify( testGuid, rejectUser, 'read' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow updating a file with correct permissions', () => {
-        return expect( verify( acceptUser, 'update', testGuid )).to.be.fulfilled;
+        return expect( verify( testGuid, acceptUser, 'update' )).to.be.fulfilled;
     });
     it( 'should reject updating a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'update', testGuid ))
+        return expect( verify( testGuid, rejectUser, 'update' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow destroying a file with correct permissions', () => {
-        return expect( verify( acceptUser, 'destroy', testGuid )).to.be.fulfilled;
+        return expect( verify( testGuid, acceptUser, 'destroy' )).to.be.fulfilled;
     });
     it( 'should reject destroying a file with incorrect permissions', () => {
-        return expect( verify( rejectUser, 'destroy', testGuid ))
+        return expect( verify( testGuid, rejectUser, 'destroy' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
     it( 'should allow insertion of a file with correct permissions on the parent folder', () => {
-        return expect( verify( acceptUser, 'write', testGuid )).to.be.fulfilled;
+        return expect( verify( testGuid, acceptUser, 'write' )).to.be.fulfilled;
     });
     it( 'should reject insertion of a file with incorrect permissions on the parent folder', () => {
-        return expect( verify( rejectUser, 'write', testGuid ))
+        return expect( verify( testGuid, rejectUser, 'write' ))
             .to.be.rejectedWith( 'NOT_ALLOWED' );
     });
 });
