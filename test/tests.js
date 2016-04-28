@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint no-console: 0 */
 /* eslint-env mocha */
 /* eslint new-cap: 0 */
 /* eslint no-unused-expressions: 0 */
@@ -14,9 +15,8 @@ const sinonchai = require( 'sinon-chai' );
 const mime = require( 'mime' );
 const mongoose = require( 'mongoose' );
 const Permissions = require( '../src/schemas/permissionSchema.js' );
-const fsPermissions = require( '../src/index.js' );
+const fsPermissions = require( '../src/index.js' )();
 const verify = fsPermissions.verify;
-
 chai.use( sinonchai );
 chai.use( chaiaspromised );
 
