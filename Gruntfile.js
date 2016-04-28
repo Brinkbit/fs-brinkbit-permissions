@@ -19,16 +19,16 @@ module.exports = function gruntFunct( grunt ) {
                 atBegin: true,
             },
             scripts: {
-                files: ['src/**/*.js', 'test/**/*.js'],
-                tasks: ['eslint', 'mochaTest'],
+                files: [ 'src/**/*.js', 'test/**/*.js' ],
+                tasks: [ 'eslint', 'mochaTest' ],
             },
         },
 
         eslint: {
-            target: ['src/**/*.js', 'test/**/*.js'],
+            target: [ 'src/**/*.js', 'test/**/*.js' ],
         },
     });
 
-    grunt.registerTask( 'default', ['eslint', 'mochaTest']);
+    grunt.registerTask( 'default', [ 'eslint', 'mochaTest' ]);
     grunt.registerTask( 'debug', ['watch']);
 };
