@@ -6,6 +6,7 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const chaiaspromised = require( 'chai-as-promised' );
 const sinonchai = require( 'sinon-chai' );
+const MongooseObject = require( 'mongoose' ).Types.ObjectId;
 const R = require( 'Ramda' );
 chai.use( sinonchai );
 chai.use( chaiaspromised );
@@ -14,17 +15,17 @@ const fsPermissions = require( '../src/index.js' )();
 const verify = fsPermissions.verify;
 
 
-const acceptUser = 'goodUserId';
-const rejectUser = 'badUserId';
-const testGuid = '8d461483-e701-47ca-8788-c6210550fdb9';
 const path = [ 'level1', 'level2', 'level3', 'test.txt' ];
+const acceptUser = new MongooseObject();
+const rejectUser = new MongooseObject();
+const testGuid = new MongooseObject();
 
 // create the meta and permissions
 const insertFixture = function insertFixture( pathVar ) {
     const good = {
         resourceId: testGuid,
         appliesTo: 'user',
-        userId: 'goodUserId',
+        userId: acceptUser,
         groupId: null,
         read: true,
         write: true,
@@ -33,7 +34,7 @@ const insertFixture = function insertFixture( pathVar ) {
     };
 
     const bad = R.clone( good );
-    bad.userId = 'badUserId';
+    bad.userId = rejectUser;
     bad.read = bad.write = bad.destroy = bad.manage = false;
 
     const promises = pathVar.map(( value, index, array ) => {
@@ -57,7 +58,6 @@ describe( 'verify', () => {
         .then( insertFixture( path ))
         .then( done );
     });
-
 
     afterEach( done => {
         Permissions.remove({ resourceId: testGuid }).exec()
