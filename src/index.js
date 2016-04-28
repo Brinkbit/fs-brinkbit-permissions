@@ -3,6 +3,7 @@
 const mongoose = require( 'mongoose' );
 const conn = mongoose.connection;
 const Permissions = require( './schemas/permissionSchema.js' );
+mongoose.Promise = Promise;
 
 const connect = () => {
     return new Promise(( resolve, reject ) => {
@@ -29,7 +30,7 @@ const verify = ( guid, userId, operation ) => {
     .catch( err => Promise.reject( err ));
 };
 
-module.exports = () => {
+module.exports = function fsBrinkbitPermissions() {
     return {
         verify,
         connect,
