@@ -1,5 +1,5 @@
 {
-  "name": "fs-brinkbit-permisions",
+  "name": "fs-brinkbit-permissions",
   "version": "0.0.1",
   "description": "The Brinkbit specific permissions layer for Brinkbit's FS module",
   "main": "src/index.js",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Brinkbit/fs-brinkbit-permissions#readme",
   "dependencies": {
-    "fs-s3-mongo": "joshfttb/fs-s3-mongo",
+    "fs-s3-mongo": "git+https://github.com/BrianSilvia/fs-s3-mongo.git",
     "http-server": "^0.8.5",
     "mime": "^1.3.4",
     "mongoose": "^4.3.5"
