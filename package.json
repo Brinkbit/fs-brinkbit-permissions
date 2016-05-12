@@ -19,10 +19,12 @@
   },
   "homepage": "https://github.com/Brinkbit/fs-brinkbit-permissions#readme",
   "dependencies": {
+    "brinkbit-logger": "^0.2.2",
     "fs-s3-mongo": "git+https://github.com/Brinkbit/fs-s3-mongo.git",
     "http-server": "^0.8.5",
     "mime": "^1.3.4",
-    "mongoose": "^4.3.5"
+    "mongoose": "^4.3.5",
+    "the-brink-mongodb": "file:///Users/Brian/Documents/brinkbit/the-brink-mongodb"
   },
   "pre-commit": [
     "eslint-pre-commit"
