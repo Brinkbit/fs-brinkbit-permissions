@@ -5,11 +5,10 @@
 const chai = require( 'chai' );
 const expect = chai.expect;
 const chaiaspromised = require( 'chai-as-promised' );
-const sinonchai = require( 'sinon-chai' );
 const MongooseObject = require( 'mongoose' ).Types.ObjectId;
 const R = require( 'Ramda' );
-chai.use( sinonchai );
 chai.use( chaiaspromised );
+const db = require( 'the-brink-mongodb' );
 const Permissions = require( '../src/schemas/permissionSchema.js' );
 const fsPermissions = require( '../src/index.js' )();
 const verify = fsPermissions.verify;
@@ -54,14 +53,14 @@ const insertFixture = function insertFixture( pathVar ) {
 
 describe( 'verify', () => {
     beforeEach( done => {
-        fsPermissions.connect()
+        db.connect()
         .then( insertFixture( path ))
         .then( done );
     });
 
     afterEach( done => {
         Permissions.remove({ resourceId: testGuid }).exec()
-        .then(() => done());
+        .then( done );
     });
 
     it( 'should allow reading a file with correct permissions', () => {
