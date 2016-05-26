@@ -39,7 +39,6 @@
     "eslint-plugin-react": "^3.5.1",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
-    "load-grunt-tasks": "^3.3.0",
     "mocha": "^2.3.2",
     "path": "^0.12.7",
     "pre-commit": "^1.1.1",
