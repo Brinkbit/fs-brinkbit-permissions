@@ -16,4 +16,4 @@ const permissionsSchema = new Schema({
     manage: Boolean, // update/remove existing permissions on resource
 });
 
-module.exports = mongoose.model( 'Permissions', permissionsSchema );
+module.exports = ( mon ) => mon.model( 'Permissions', permissionsSchema );
