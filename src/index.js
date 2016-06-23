@@ -1,6 +1,6 @@
 'use strict';
 
-const logger = require( 'brinkbit-logger' )({ __filename, transport: 'production' });
+const logger = require( 'brinkbit-logger' )({ __filename });
 const mongoose = require( 'mongoose' );
 const conn = mongoose.connection;
 const Permissions = require( '../src/schemas/permissionSchema.js' )( conn );
